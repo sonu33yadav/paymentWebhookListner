@@ -2,10 +2,18 @@ from fastapi import APIRouter
 from fastapi import Request
 from fastapi import Header
 from fastapi import Depends
+from pydantic import BaseModel
+from typing import Dict, Any
 
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+
+
+class WebhookPayload(BaseModel):
+    event: str
+    payload: Dict[str, Any]
+
 
 from app.controllers.payment_controller import (
     process_payment_webhook,
@@ -17,6 +25,7 @@ router = APIRouter()
 
 @router.post("/webhook/payments")
 async def payment_webhook(
+    webhook_data: WebhookPayload,
     request: Request,
     x_razorpay_signature: str = Header(None),
     db: Session = Depends(get_db),
